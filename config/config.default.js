@@ -23,6 +23,22 @@ module.exports = appInfo => {
     // myAppName: 'egg',
   };
 
+  config.io = {
+    // init: { }, // passed to engine.io
+    redis: {
+      host: '192.168.1.28',
+      port: 30379,
+      auth_pass: '123456',
+      db: 0,
+    },
+    namespace: {
+      '/': {
+        connectionMiddleware: [ 'auth' ],
+        packetMiddleware: [],
+      },
+    },
+  };
+
   return {
     ...config,
     ...userConfig,
