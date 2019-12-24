@@ -1,6 +1,6 @@
 'use strict';
 
-const PREFIX = 'room';
+// const PREFIX = 'room';
 module.exports = () => {
   return async (ctx, next) => {
     const { app, socket, logger, helper } = ctx;
@@ -57,8 +57,10 @@ module.exports = () => {
       const clientsDetail = {};
       clients.forEach(client => {
         const _client = app.io.sockets.sockets[client];
-        const _query = _client.handshake.query;
-        clientsDetail[client] = _query;
+        if (_client) {
+          const _query = _client.handshake.query;
+          clientsDetail[client] = _query;
+        }
       });
       if (room === 'heart') {
         nsp.to('heart').emit('online', {
@@ -94,8 +96,10 @@ module.exports = () => {
       const clientsDetail = {};
       clients.forEach(client => {
         const _client = app.io.sockets.sockets[client];
-        const _query = _client.handshake.query;
-        clientsDetail[client] = _query;
+        if (_client) {
+          const _query = _client.handshake.query;
+          clientsDetail[client] = _query;
+        }
       });
       if (room !== 'heart') {
         // 更新在线用户列表
