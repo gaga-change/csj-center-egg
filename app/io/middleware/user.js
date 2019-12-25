@@ -24,6 +24,9 @@ module.exports = () => {
     const nspSys = app.io.of('/sys');
     const query = socket.handshake.query;
     // 这里加一行：记录日志socket.handshake
+    const address = socket.handshake.address;
+    console.log(socket.handshake);
+    console.log(address);
     // 用户信息
     const { room } = query;
     const rooms = [ room ];

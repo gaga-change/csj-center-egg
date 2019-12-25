@@ -26,9 +26,9 @@ module.exports = appInfo => {
   config.io = {
     // init: { }, // passed to engine.io
     redis: {
-      host: '192.168.1.28',
-      port: 30378,
-      auth_pass: '123456',
+      host: process.env.REDIS_HOST || '192.168.1.28',
+      port: process.env.REDIS_PORT || '30377',
+      auth_pass: process.env.REDIS_AUTH_PASS || '123456',
       db: 0,
     },
     namespace: {
