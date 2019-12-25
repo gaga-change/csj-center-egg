@@ -27,13 +27,21 @@ module.exports = appInfo => {
     // init: { }, // passed to engine.io
     redis: {
       host: '192.168.1.28',
-      port: 30379,
+      port: 30378,
       auth_pass: '123456',
       db: 0,
     },
     namespace: {
-      '/': {
-        connectionMiddleware: [ 'auth' ],
+      // '/': {
+      //   connectionMiddleware: [ 'auth' ],
+      //   packetMiddleware: [],
+      // },
+      '/user': {
+        connectionMiddleware: [ 'user' ],
+        packetMiddleware: [],
+      },
+      '/sys': {
+        connectionMiddleware: [ 'sys' ],
         packetMiddleware: [],
       },
     },

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible"
+    content="ie=edge">
+  <title>sys</title>
+</head>
+
+<body>
+  <div>
+    sys
+  </div>
+  <script src="./lib/jquery/3.4.1/jquery.min.js"></script>
+  <script src="./lib/socket.io/2.3.0/socket.io.js"></script>
+  <script>
+    const log = console.log;
+
+    window.onload = function () {
+      // init
+      const socket = io('/sys', {
+        // 实际使用中可以在这里传递参数
+        query: {
+          room: 'demo01',
+          userId: `sys_client_${Math.random()}`,
+          username: 'sys测试-gaga'
+        },
+        transports: ['websocket']
+      });
+      socket.on('connect', () => {
+        const id = socket.id;
+        log('#connect,', id, socket);
+      });
+      socket.on('user all online', msg => {
+        log('#userAllOnlie,', msg);
+      });
+      socket.on('user room online', msg => {
+        log('#userRoomOnlie', msg)
+      })
+      window.socket = socket;
+    };
+  </script>
+</body>
+
+</html>
