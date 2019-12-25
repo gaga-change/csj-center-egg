@@ -24,7 +24,7 @@ module.exports = () => {
         const _client = app.io.sockets.sockets[client.substr(nameSpaceLen)];
         if (_client) { // redis缓存里有id但当前socket服务没有响应的详情情况下跳过（有其他服务连接同一个redis，导致room共用）
           const _query = _client.handshake.query;
-          clientArr.push(_query);
+          clientArr.push({ ..._query, clientId: client });
         }
       });
       return clientArr;

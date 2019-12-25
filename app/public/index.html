@@ -24,14 +24,16 @@
   <script src="./lib/socket.io/2.3.0/socket.io.js"></script>
   <script>
     const log = console.log;
-
+    // http://localhost:5000 
     window.onload = function () {
       // init
-      const socket = io('/', {
+      const socket = io('/user', {
         // 实际使用中可以在这里传递参数
         query: {
-          room: 'shark.csjmro.com',
+          room: 'localhost:5000',
           userId: `client_${Math.random()}`,
+          username: `client_${Math.random()}`,
+          version: '2.1.5',
         },
         transports: ['websocket']
       });
@@ -50,20 +52,20 @@
       // 接收在线用户信息
       socket.on('online', msg => {
         log('#online,', msg);
-        $('#useClient').empty()
-        msg.clients.forEach(uid => {
-          $('#useClient').append(`<li>${uid}</li>`)
-        })
+        // $('#useClient').empty()
+        // msg.clients.forEach(uid => {
+        //   $('#useClient').append(`<li>${uid}</li>`)
+        // })
       });
 
-      socket.on('shark.csjmro.com', msg => {
-        if (msg.data.payload.version) {
-          log('version:', msg.data.payload.version)
-          $('#version').text(msg.data.payload.version)
-        } else {
-          log('#heartMsg,', msg);
-        }
-      });
+      // socket.on('shark.csjmro.com', msg => {
+      //   if (msg.data.payload.version) {
+      //     log('version:', msg.data.payload.version)
+      //     $('#version').text(msg.data.payload.version)
+      //   } else {
+      //     log('#heartMsg,', msg);
+      //   }
+      // });
 
       // 系统事件
       socket.on('disconnect', msg => {
