@@ -8,30 +8,43 @@
   <meta http-equiv="X-UA-Compatible"
     content="ie=edge">
   <title>系统监控平台</title>
+  <link rel="stylesheet"
+    href="http://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <link rel="stylesheet"
+    href="./css/sys.css">
 </head>
 
 <body>
-  <div>
-    <div id="app">
-      <ul>
-        <li v-for="(clients, key) in roomClients" :key="key">
-          {{key}}
-          <ul>
-            <li v-for="client in clients" :key="client.clientId">
-              {{client.userId}} - {{client.username}}
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
+  <h4>系统在线人员统计</h4>
+  <div id="app"
+    class="app_hide">
+    <el-card class="mt20"
+      v-for="(clients, key) in roomClients"
+      :key="key">
+      <div slot="header"
+        class="clearfix">
+        <span>{{key}}</span>
+      </div>
+      <template v-for="(client, index) in clients">
+        <el-tooltip :key="client.clientId" :content="`${client.userId}`"
+          placement="top"
+          effect="light">
+          <el-tag :class="{ml10: index !== 0}"
+            >{{client.username}} - {{client.version}}</el-tag>
+        </el-tooltip>
+      </template>
+    </el-card>
   </div>
   <script src="./lib/jquery/3.4.1/jquery.min.js"></script>
   <script src="./lib/socket.io/2.3.0/socket.io.js"></script>
   <script src="http://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="http://unpkg.com/element-ui/lib/index.js"></script>
   <script>
+    Vue.prototype.$ELEMENT = { size: 'mini', zIndex: 3000 };
     var app = new Vue({
       el: '#app',
       data: {
+        reload: false,
         rooms: [],
         roomClients: {}
       },
@@ -62,11 +75,15 @@
           const { room, clients } = msg
           if (clients.length === 0) {
             delete this.roomClients[room]
-            this.roomClients = {...this.roomClients}
+            this.roomClients = { ...this.roomClients }
           } else {
             this.$set(this.roomClients, room, clients)
           }
         })
+      },
+      mounted() {
+        this.reload = true
+        $('#app').removeClass('app_hide')
       }
     })
   </script>
