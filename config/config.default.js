@@ -47,6 +47,18 @@ module.exports = appInfo => {
     },
   };
 
+  config.static = {
+    prefix: '/',
+  };
+
+  config.mongoose = {
+    url: process.env.MONGODB_LINK || 'mongodb://localhost/test',
+    options: {
+      useFindAndModify: false,
+    },
+    plugins: [],
+  };
+
   return {
     ...config,
     ...userConfig,

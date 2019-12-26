@@ -10,11 +10,11 @@ class NspController extends Controller {
     const client = socket.id;
 
     try {
-      const { namespace = '/user', target, payload } = message;
+      const { namespace = '/user', target, action, payload } = message;
       const nsp = app.io.of(namespace);
-      if (!target) return;
-      const msg = ctx.helper.parseMsg('exchange', payload, { client, target });
-      nsp.to(target).emit(target, msg);
+      if (!target || !action) return;
+      const msg = ctx.helper.parseMsg(action, payload, { client, target });
+      nsp.to(target).emit('exchange', msg);
     } catch (error) {
       app.logger.error(error);
     }

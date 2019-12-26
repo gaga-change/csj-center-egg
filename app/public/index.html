@@ -1,88 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible"
-    content="ie=edge">
-  <title>系统平台控制中心</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>监控平台</title>
 </head>
-
 <body>
-  <div>
-    <p>当前系统： shark.csjmro.com</p>
-    <p>当前版本：<span id="version"></span></p>
-    <p>使用客户端：</p>
-    <ul id="useClient">
-      <li></li>
-    </ul>
-
-  </div>
-  <script src="./lib/jquery/3.4.1/jquery.min.js"></script>
-  <script src="./lib/socket.io/2.3.0/socket.io.js"></script>
-  <script>
-    const log = console.log;
-    // http://localhost:5000 
-    window.onload = function () {
-      // init
-      const socket = io('/user', {
-        // 实际使用中可以在这里传递参数
-        query: {
-          room: 'localhost:5000',
-          userId: `client_${Math.random()}`,
-          username: `client_${Math.random()}`,
-          version: '2.1.5',
-        },
-        transports: ['websocket']
-      });
-
-      socket.on('connect', () => {
-        const id = socket.id;
-
-        log('#connect,', id, socket);
-
-        // 监听自身 id 以实现 p2p 通讯
-        socket.on(id, msg => {
-          log('#receive,', msg);
-        });
-      });
-
-      // 接收在线用户信息
-      socket.on('online', msg => {
-        log('#online,', msg);
-        // $('#useClient').empty()
-        // msg.clients.forEach(uid => {
-        //   $('#useClient').append(`<li>${uid}</li>`)
-        // })
-      });
-
-      // socket.on('shark.csjmro.com', msg => {
-      //   if (msg.data.payload.version) {
-      //     log('version:', msg.data.payload.version)
-      //     $('#version').text(msg.data.payload.version)
-      //   } else {
-      //     log('#heartMsg,', msg);
-      //   }
-      // });
-
-      // 系统事件
-      socket.on('disconnect', msg => {
-        log('#disconnect', msg);
-      });
-
-      socket.on('disconnecting', () => {
-        log('#disconnecting');
-      });
-
-      socket.on('error', () => {
-        log('#error');
-      });
-
-      window.socket = socket;
-    };
-  </script>
+  <a href="/localTest.html">本地测试页面</a>
 </body>
-
 </html>

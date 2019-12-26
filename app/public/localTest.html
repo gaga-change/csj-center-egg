@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible"
+    content="ie=edge">
+  <title>系统平台控制中心</title>
+</head>
+
+<body>
+  <div>
+    需启动 csj-heart-node 项目
+    <p>当前系统： <span id="host"></span></p>
+    <p>当前版本：<span id="version"></span></p>
+    <div>
+      <input type="text"
+        id="newVersion"
+        readonly> <button id="updateBtn">更新版本</button>
+    </div>
+    <p>使用客户端：</p>
+    <ul id="useClient">
+      <li></li>
+    </ul>
+
+  </div>
+
+  <script src="./lib/jquery/3.4.1/jquery.min.js"></script>
+  <script src="./lib/socket.io/2.3.0/socket.io.js"></script>
+  <script src="/version.js"></script>
+  <script>
+
+    const log = console.log;
+
+    log('当前版本', VERSION)
+
+    var version = VERSION
+    $('#version').html(version)
+    $('#host').html(location.host)
+    $('#updateBtn').click(e => {
+      let temp = version.split('.')
+      temp[temp.length - 1] = Number(temp[temp.length - 1]) + 1
+      val = temp.join('.')
+      $('#newVersion').val(val)
+      $.get(`/versionUpdate?version=${val}`)
+    })
+
+    const socket = io('/user', {
+      // 实际使用中可以在这里传递参数
+      query: {
+        room: location.host,
+        userId: `client_${Math.random()}`,
+        username: `client_${Math.random()}`,
+        version: version,
+      },
+      transports: ['websocket']
+    });
+    socket.on('connect', () => {
+      const id = socket.id;
+      log('#connect,', id, socket);
+    });
+    socket.on('exchange', msg => {
+      log(msg)
+      const { meta, data } = msg
+      const { action, payload } = data
+      if (action === 'version update') {
+        console.log('新版本', payload.version)
+        if (version !== payload.version) {
+          version = payload.version
+          console.log('提示：版本更新')
+        }
+      }
+    })
+    // 接收在线用户信息
+    socket.on('online', msg => {
+      log('#online,', msg);
+    });
+    // 系统事件
+    socket.on('disconnect', msg => {
+      log('#disconnect', msg);
+    });
+
+    socket.on('disconnecting', () => {
+      log('#disconnecting');
+    });
+
+    socket.on('error', () => {
+      log('#error');
+    });
+  </script>
+</body>
+
+</html>
