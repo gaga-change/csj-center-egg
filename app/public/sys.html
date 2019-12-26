@@ -7,41 +7,68 @@
     content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible"
     content="ie=edge">
-  <title>sys</title>
+  <title>系统监控平台</title>
 </head>
 
 <body>
   <div>
-    sys
+    <div id="app">
+      <ul>
+        <li v-for="(clients, key) in roomClients" :key="key">
+          {{key}}
+          <ul>
+            <li v-for="client in clients" :key="client.clientId">
+              {{client.userId}} - {{client.username}}
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
   <script src="./lib/jquery/3.4.1/jquery.min.js"></script>
   <script src="./lib/socket.io/2.3.0/socket.io.js"></script>
+  <script src="http://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script>
-    const log = console.log;
-
-    window.onload = function () {
-      // init
-      const socket = io('/sys', {
-        // 实际使用中可以在这里传递参数
-        query: {
-          room: 'demo01',
-          userId: `sys_client_${Math.random()}`,
-          username: 'sys测试-gaga'
-        },
-        transports: ['websocket']
-      });
-      socket.on('connect', () => {
-        const id = socket.id;
-        log('#connect,', id, socket);
-      });
-      socket.on('user all online', msg => {
-        log('#userAllOnlie,', msg);
-      });
-      socket.on('user room online', msg => {
-        log('#userRoomOnlie', msg)
-      })
-      window.socket = socket;
-    };
+    var app = new Vue({
+      el: '#app',
+      data: {
+        rooms: [],
+        roomClients: {}
+      },
+      created() {
+        const socket = io('/sys', {
+          // 实际使用中可以在这里传递参数
+          query: {
+            room: 'csj-center-egg',
+            userId: `csj-center-egg_client_${Math.random()}`,
+            username: 'csj-center-egg'
+          },
+          transports: ['websocket']
+        });
+        socket.on('user all online', msg => {
+          const { clients } = msg
+          let temp = new Set()
+          let roomClients = {}
+          clients.forEach(v => {
+            temp.add(v.room)
+            this.roomClients
+            roomClients[v.room] = roomClients[v.room] || []
+            roomClients[v.room].push(v)
+          })
+          this.rooms = [...temp]
+          this.roomClients = roomClients
+        });
+        socket.on('user room online', msg => {
+          const { room, clients } = msg
+          if (clients.length === 0) {
+            delete this.roomClients[room]
+            this.roomClients = {...this.roomClients}
+          } else {
+            this.$set(this.roomClients, room, clients)
+          }
+        })
+      }
+    })
   </script>
 </body>
 
