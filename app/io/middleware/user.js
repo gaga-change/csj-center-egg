@@ -23,10 +23,6 @@ module.exports = () => {
     const nsp = app.io.of('/user');
     const nspSys = app.io.of('/sys');
     const query = socket.handshake.query;
-    // 这里加一行：记录日志socket.handshake
-    const address = socket.handshake.address;
-    console.log(socket.handshake);
-    console.log(address);
     // 用户信息
     const { room } = query;
     const rooms = [ room ];
@@ -49,6 +45,7 @@ module.exports = () => {
     nsp.adapter.clients(rooms, (err, clients) => {
       // 更新在线用户列表
       const res = {
+        meta: { timestamp: Date.now() },
         room,
         clients: getClientsDetail(clients),
         action: 'join',
@@ -64,11 +61,12 @@ module.exports = () => {
     nsp.adapter.clients(rooms, (err, clients) => {
       // 更新在线用户列表
       const res = {
+        meta: { timestamp: Date.now() },
         room,
         clients: getClientsDetail(clients),
         action: 'leave',
         message: `User(${id}) leaved.`,
-        client: query,
+        client: { ...query, clientId: id },
       };
       nsp.to(room).emit('online', res);
       nspSys.emit('user room online', res);

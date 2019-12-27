@@ -35,6 +35,7 @@ module.exports = () => {
     nspUser.adapter.clients([], (err, clients) => {
       // 发送当前用户的在线列表，指定当前人员
       nsp.to(id).emit('user all online', {
+        meta: { timestamp: Date.now() },
         clients: getClientsDetail(clients),
       });
     });
