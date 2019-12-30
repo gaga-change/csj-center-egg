@@ -55,7 +55,8 @@
       data: {
         reload: false,
         rooms: [],
-        roomClients: {}
+        roomClients: {},
+        paddingTime: 0
       },
       created() {
         const socket = io('/sys', {
@@ -68,7 +69,8 @@
           transports: ['websocket']
         });
         socket.on('user all online', msg => {
-          const { clients } = msg
+          const { clients, meta } = msg
+          this.paddingTime = Date.now() - meta.timestamp
           console.log('user all online', clients)
           let temp = new Set()
           let roomClients = {}
@@ -124,7 +126,8 @@
       methods: {
         moment,
         fromNow(time) {
-          return this.moment(time).fromNow()
+          let res = (new Date(time)).getTime() + this.paddingTime
+          return this.moment(res).fromNow()
         }
       }
     })
