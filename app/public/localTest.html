@@ -12,7 +12,7 @@
 
 <body>
   <div>
-    需启动 csj-heart-node 项目 (可以同时打开 localhost 和  127.0.0.1 、本地内网ip地址)
+    需启动 csj-heart-node 项目 (可以同时打开 localhost 和 127.0.0.1 、本地内网ip地址)
     <p>当前系统： <span id="host"></span></p>
     <p>当前版本：<span id="version"></span></p>
     <div>
@@ -20,11 +20,6 @@
         id="newVersion"
         readonly> <button id="updateBtn">更新版本</button>
     </div>
-    <p>使用客户端：</p>
-    <ul id="useClient">
-      <li></li>
-    </ul>
-
   </div>
 
   <script src="./lib/jquery/3.4.1/jquery.min.js"></script>
@@ -89,6 +84,25 @@
     socket.on('error', () => {
       log('#error');
     });
+    function live() {
+      let tick = null
+      let temp = function () {
+        tick = setTimeout(() => {
+          console.log('执行', Date.now())
+          socket.emit('living')
+          tick = null
+        }, 1000)
+      }
+      document.addEventListener('click', (e) => {
+        if (tick) {
+          return
+        } else {
+          temp()
+        }
+      })
+    }
+    live()
+
   </script>
 </body>
 

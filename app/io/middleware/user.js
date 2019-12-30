@@ -19,57 +19,24 @@
 module.exports = () => {
   return async (ctx, next) => {
     const { app, socket } = ctx;
+    const { Client } = ctx.model;
     const id = socket.id;
-    const nsp = app.io.of('/user');
     const nspSys = app.io.of('/sys');
     const query = socket.handshake.query;
     // 用户信息
     const { room } = query;
-    const rooms = [ room ];
-    /* 根据客户端id 获取详情 */
-    const getClientsDetail = clients => {
-      const nameSpaceLen = '/user#'.length;
-      const clientArr = [];
-      clients.forEach(client => {
-        const _client = app.io.sockets.sockets[client.substr(nameSpaceLen)];
-        if (_client) { // redis缓存里有id但当前socket服务没有响应的详情情况下跳过（有其他服务连接同一个redis，导致room共用）
-          const _query = _client.handshake.query;
-          clientArr.push({ ..._query, clientId: client });
-        }
-      });
-      return clientArr;
-    };
     // 用户加入
     socket.join(room);
-    // 在线列表
-    nsp.adapter.clients(rooms, (err, clients) => {
-      // 更新在线用户列表
-      const res = {
-        meta: { timestamp: Date.now() },
-        room,
-        clients: getClientsDetail(clients),
-        action: 'join',
-        message: `User(${id}) joined.`,
-        client: { ...query, clientId: id },
-      };
-      nsp.to(room).emit('online', res);
-      nspSys.emit('user room online', res);
-    });
+    // 存储用户信息倒数据库
+    const client = await new Client({ clientId: id, ...query, connectTime: Date.now(), lastLiveTime: Date.now() }).save();
+    // 通知 /sys 下的连接，房间人员变动
+    nspSys.emit('user room online', { meta: { timestamp: Date.now() }, room, action: 'join', client });
     await next();
-    // 用户离开
-    // 在线列表
-    nsp.adapter.clients(rooms, (err, clients) => {
-      // 更新在线用户列表
-      const res = {
-        meta: { timestamp: Date.now() },
-        room,
-        clients: getClientsDetail(clients),
-        action: 'leave',
-        message: `User(${id}) leaved.`,
-        client: { ...query, clientId: id },
-      };
-      nsp.to(room).emit('online', res);
-      nspSys.emit('user room online', res);
-    });
+    // 用户离开，删除数据库中的信息
+    await Client.deleteMany({ clientId: id });
+    // 修改最后一次活跃时间
+    client.lastLiveTime = Date.now();
+    // 通知 /sys 下的连接，房间人员变动
+    nspSys.emit('user room online', { meta: { timestamp: Date.now() }, room, action: 'leave', client });
   };
 };

@@ -26,11 +26,17 @@
         <span>{{key}}</span>
       </div>
       <template v-for="(client, index) in clients">
-        <el-tooltip :key="client.clientId" :content="`${client.userId}`"
+        <el-tooltip :key="client.clientId"
           placement="top"
           effect="light">
-          <el-tag :class="{ml10: index !== 0}"
-            >{{client.username}} - {{client.version}}</el-tag>
+          <div slot="content">
+            用户： {{client.userId}}
+            <br>
+            连接时间： {{client.connectTimeShow}}
+            <br>
+            活跃时间： {{client.lastLiveTimeShow}}
+          </div>
+          <el-tag :class="{ml10: index !== 0}">{{client.username}} - {{client.version}}</el-tag>
         </el-tooltip>
       </template>
     </el-card>
@@ -39,6 +45,9 @@
   <script src="./lib/socket.io/2.3.0/socket.io.js"></script>
   <script src="http://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="http://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://cdn.bootcss.com/moment.js/2.24.0/moment.min.js"></script>
+  <script src="http://cdn.bootcss.com/moment.js/2.24.0/locale/zh-cn.js"></script>
+  <!-- <script src="http://cdn.bootcss.com/echarts/4.1.0/echarts.min.js"></script> -->
   <script>
     Vue.prototype.$ELEMENT = { size: 'mini', zIndex: 3000 };
     var app = new Vue({
@@ -52,7 +61,7 @@
         const socket = io('/sys', {
           // 实际使用中可以在这里传递参数
           query: {
-            room: 'csj-center-egg',
+            room: 'center',
             userId: `csj-center-egg_client_${Math.random()}`,
             username: 'csj-center-egg'
           },
@@ -60,11 +69,13 @@
         });
         socket.on('user all online', msg => {
           const { clients } = msg
+          console.log('user all online', clients)
           let temp = new Set()
           let roomClients = {}
           clients.forEach(v => {
+            v.connectTimeShow = this.fromNow(v.connectTime)
+            v.lastLiveTimeShow = this.fromNow(v.lastLiveTime)
             temp.add(v.room)
-            this.roomClients
             roomClients[v.room] = roomClients[v.room] || []
             roomClients[v.room].push(v)
           })
@@ -72,18 +83,49 @@
           this.roomClients = roomClients
         });
         socket.on('user room online', msg => {
-          const { room, clients } = msg
-          if (clients.length === 0) {
-            delete this.roomClients[room]
-            this.roomClients = { ...this.roomClients }
+          console.log('user room online', msg)
+          const { room, clients, client, action } = msg
+          if (action === 'join') {
+            if (!this.roomClients[room]) {
+              this.$set(this.roomClients, room, [])
+            }
+            client.connectTimeShow = this.fromNow(client.connectTime)
+            client.lastLiveTimeShow = this.fromNow(client.lastLiveTime)
+            this.roomClients[room].unshift(client)
           } else {
-            this.$set(this.roomClients, room, clients)
+            this.roomClients[room].splice(this.roomClients[room].findIndex(v => v.clientId === client.clientId), 1)
+            if (this.roomClients[room].length === 0) {
+              delete this.roomClients[room]
+              this.roomClients = { ...this.roomClients }
+            }
           }
+        })
+        socket.on('on living', client => {
+          console.log('on living', client)
+          const { room, clientId } = client
+          client.connectTimeShow = this.fromNow(client.connectTime)
+          client.lastLiveTimeShow = this.fromNow(client.lastLiveTime)
+          this.roomClients[room].splice(this.roomClients[room].findIndex(v => v.clientId === clientId), 1)
+          this.roomClients[room].unshift(client)
         })
       },
       mounted() {
         this.reload = true
         $('#app').removeClass('app_hide')
+        setInterval(() => {
+          for (let room in this.roomClients) {
+            this.roomClients[room].forEach(v => {
+              v.connectTimeShow = this.fromNow(v.connectTime)
+              v.lastLiveTimeShow = this.fromNow(v.lastLiveTime)
+            })
+          }
+        }, 3000)
+      },
+      methods: {
+        moment,
+        fromNow(time) {
+          return this.moment(time).fromNow()
+        }
       }
     })
   </script>

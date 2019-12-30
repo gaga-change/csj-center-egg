@@ -19,6 +19,15 @@ class NspController extends Controller {
       app.logger.error(error);
     }
   }
+
+  async living() {
+    const { ctx, app } = this;
+    const socket = ctx.socket;
+    const id = socket.id;
+    const client = await ctx.model.Client.findOneAndUpdate({ clientId: id }, { lastLiveTime: Date.now() });
+    const nspSys = app.io.of('/sys');
+    nspSys.to('center').emit('on living', client);
+  }
 }
 
 module.exports = NspController;
