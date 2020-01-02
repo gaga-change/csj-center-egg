@@ -16,6 +16,11 @@ module.exports = app => {
   router.resources('/api/roomOnlineLog', controller.roomOnlineLog);
   router.post('/api/roomOnlineLog/save', controller.roomOnlineLog.save);
 
+  router.get('/api/engineState/save', controller.engineState.save);
+  router.resources('/api/engineState', controller.engineState);
+
+  router.resources('/api/engineStateLog', controller.engineStateLog);
+
   io.of('/sys').route('exchange', io.controller.nsp.exchange);
   io.of('/user').route('living', io.controller.nsp.living);
 };

@@ -8,16 +8,41 @@
   <meta http-equiv="X-UA-Compatible"
     content="ie=edge">
   <title>系统监控平台</title>
+  <link href="http://cdn.bootcss.com/normalize/8.0.1/normalize.min.css"
+    rel="stylesheet">
   <link rel="stylesheet"
     href="http://unpkg.com/element-ui/lib/theme-chalk/index.css">
   <link rel="stylesheet"
-    href="./css/sys.css">
+    href="./css/sys.css?v=202001021358">
 </head>
 
 <body>
-  <h4>系统在线人员统计</h4>
   <div id="app"
     class="app_hide">
+    <h4>主机内存&磁盘监控</h4>
+    <span v-for="item in engine"
+      :key="item.name">
+      <div style="display: inline-block;text-align: center;">
+        <el-progress type="dashboard"
+          :percentage="item.memory"
+          :color="colors">
+        </el-progress>
+        <div class="f12" :title="item.memoryHint">
+          {{item.name}}#内存
+        </div>
+      </div>
+      <div style="display: inline-block;text-align: center;">
+        <el-progress type="dashboard"
+          :percentage="item.disk"
+          :color="colors">
+        </el-progress>
+        <div class="f12" :title="item.diskHint">
+          {{item.name}}#磁盘
+        </div>
+      </div>
+    </span>
+
+    <h4>系统在线人员统计</h4>
     <el-card class="mt20"
       v-for="(clients, key) in roomClients"
       :key="key">
@@ -56,9 +81,29 @@
         reload: false,
         rooms: [],
         roomClients: {},
-        paddingTime: 0
+        paddingTime: 0,
+        engine: [
+          {
+            name: '192.168.1.38',
+            memory: 10,
+            disk: 20,
+          },
+          {
+            name: '192.168.1.42',
+            memory: 92,
+            disk: 85,
+          }
+        ],
+        colors: [
+          { color: '#6f7ad3', percentage: 40 },
+          { color: '#1989fa', percentage: 60 },
+          { color: '#5cb87a', percentage: 80 },
+          { color: '#e6a23c', percentage: 90 },
+          { color: '#f56c6c', percentage: 100 },
+        ]
       },
       created() {
+        this.initEngine()
         const socket = io('/sys', {
           // 实际使用中可以在这里传递参数
           query: {
@@ -71,7 +116,6 @@
         socket.on('user all online', msg => {
           const { clients, meta } = msg
           this.paddingTime = Date.now() - meta.timestamp
-          console.log('user all online', clients)
           let temp = new Set()
           let roomClients = {}
           clients.forEach(v => {
@@ -85,7 +129,6 @@
           this.roomClients = roomClients
         });
         socket.on('user room online', msg => {
-          console.log('user room online', msg)
           const { room, clients, client, action } = msg
           if (action === 'join') {
             if (!this.roomClients[room]) {
@@ -103,7 +146,6 @@
           }
         })
         socket.on('on living', client => {
-          console.log('on living', client)
           const { room, clientId } = client
           client.connectTimeShow = this.fromNow(client.connectTime)
           client.lastLiveTimeShow = this.fromNow(client.lastLiveTime)
@@ -128,6 +170,25 @@
         fromNow(time) {
           let res = (new Date(time)).getTime() + this.paddingTime
           return this.moment(res).fromNow()
+        },
+        initEngine() {
+          const toG = num => (num / 1024 / 1024).toFixed(2)
+          const _ = () => {
+            $.get('/api/engineState?pageSize=999').then(res => {
+              this.engine = res.list.map(v => {
+                return {
+                  name: v.remark,
+                  ip: v.ip,
+                  memory: Number((v.memoryUsed / v.memoryTotal).toFixed(2)) * 100,
+                  disk: Number((v.diskUsed / v.diskTotal).toFixed(2)) * 100,
+                  memoryHint: `内存：${toG(v.memoryUsed)}G / ${toG(v.memoryTotal)}G`,
+                  diskHint: `磁盘：${toG(v.diskUsed)}G / ${toG(v.diskTotal)}G`
+                }
+              })
+            })
+          }
+          _()
+          setInterval(_, 30000) // 30秒更新一次
         }
       }
     })
