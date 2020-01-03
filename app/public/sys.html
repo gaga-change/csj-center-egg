@@ -61,7 +61,7 @@
             <br>
             活跃时间： {{client.lastLiveTimeShow}}
           </div>
-          <el-tag :class="{ml10: index !== 0}">{{client.username}} - {{client.version}}</el-tag>
+          <el-tag :class="{ml10: index !== 0}" :type="client.noLiveTime > 300000 ? 'info': (client.noLiveTime > 180000 ? 'warning' : 'success')">{{client.username}} - {{client.version}}</el-tag>
         </el-tooltip>
       </template>
     </el-card>
@@ -74,6 +74,8 @@
   <script src="http://cdn.bootcss.com/moment.js/2.24.0/locale/zh-cn.js"></script>
   <!-- <script src="http://cdn.bootcss.com/echarts/4.1.0/echarts.min.js"></script> -->
   <script>
+    const API = ''
+    // const API = "http://csj-center-egg-v2.shop.csj361.com"
     Vue.prototype.$ELEMENT = { size: 'mini', zIndex: 3000 };
     var app = new Vue({
       el: '#app',
@@ -104,7 +106,7 @@
       },
       created() {
         this.initEngine()
-        const socket = io('/sys', {
+        const socket = io(API + '/sys', {
           // 实际使用中可以在这里传递参数
           query: {
             room: 'center',
@@ -121,6 +123,8 @@
           clients.forEach(v => {
             v.connectTimeShow = this.fromNow(v.connectTime)
             v.lastLiveTimeShow = this.fromNow(v.lastLiveTime)
+            v.noLiveTime = Date.now() - (new Date(v.lastLiveTime)).getTime() - this.paddingTime
+
             temp.add(v.room)
             roomClients[v.room] = roomClients[v.room] || []
             roomClients[v.room].push(v)
@@ -136,6 +140,8 @@
             }
             client.connectTimeShow = this.fromNow(client.connectTime)
             client.lastLiveTimeShow = this.fromNow(client.lastLiveTime)
+            client.noLiveTime = Date.now() - (new Date(client.lastLiveTime)).getTime() - this.paddingTime
+
             this.roomClients[room].unshift(client)
           } else {
             this.roomClients[room].splice(this.roomClients[room].findIndex(v => v.clientId === client.clientId), 1)
@@ -149,6 +155,8 @@
           const { room, clientId } = client
           client.connectTimeShow = this.fromNow(client.connectTime)
           client.lastLiveTimeShow = this.fromNow(client.lastLiveTime)
+          client.noLiveTime = Date.now() - (new Date(client.lastLiveTime)).getTime() - this.paddingTime
+
           this.roomClients[room].splice(this.roomClients[room].findIndex(v => v.clientId === clientId), 1)
           this.roomClients[room].unshift(client)
         })
@@ -161,9 +169,10 @@
             this.roomClients[room].forEach(v => {
               v.connectTimeShow = this.fromNow(v.connectTime)
               v.lastLiveTimeShow = this.fromNow(v.lastLiveTime)
+              v.noLiveTime = Date.now() - (new Date(v.lastLiveTime)).getTime() - this.paddingTime
             })
           }
-        }, 3000)
+        }, 3000) // 3 秒更新一次用户上一次活跃
       },
       methods: {
         moment,
@@ -174,15 +183,15 @@
         initEngine() {
           const toG = num => (num / 1024 / 1024).toFixed(2)
           const _ = () => {
-            $.get('/api/engineState?pageSize=999').then(res => {
+            $.get(API + '/api/engineState?pageSize=999').then(res => {
               this.engine = res.list.map(v => {
                 return {
                   name: v.remark,
                   ip: v.ip,
-                  memory: Number((v.memoryUsed / v.memoryTotal).toFixed(2)) * 100,
-                  disk: Number((v.diskUsed / v.diskTotal).toFixed(2)) * 100,
-                  memoryHint: `内存：${toG(v.memoryUsed)}G / ${toG(v.memoryTotal)}G`,
-                  diskHint: `磁盘：${toG(v.diskUsed)}G / ${toG(v.diskTotal)}G`
+                  memory: Math.round(Number((v.memoryUsed / v.memoryTotal).toFixed(2)) * 100),
+                  disk: Math.round(Number((v.diskUsed / v.diskTotal).toFixed(2)) * 100),
+                  memoryHint: `${v.ip} - 内存：${toG(v.memoryUsed)}G / ${toG(v.memoryTotal)}G`,
+                  diskHint: `${v.ip} - 磁盘：${toG(v.diskUsed)}G / ${toG(v.diskTotal)}G`
                 }
               })
             })
