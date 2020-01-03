@@ -21,7 +21,7 @@ class RoomOnlineLogController extends BaseController {
     date.setMilliseconds(0);
     this.success(await ctx.model.RoomOnlineLog.updateOne({ room, date }, {
       room,
-      clients,
+      // clients,
       clientsNum: clients.length,
       date,
     }, { upsert: true }));
