@@ -25,6 +25,10 @@ class NspController extends Controller {
     const socket = ctx.socket;
     const id = socket.id;
     const client = await ctx.model.Client.findOneAndUpdate({ clientId: id }, { lastLiveTime: Date.now() }, { new: true });
+    // if (!client) {
+    //   app.logger.error('living 异常：客户端未找到');
+    //   return;
+    // }
     const nspSys = app.io.of('/sys');
     nspSys.to('center').emit('on living', client);
   }

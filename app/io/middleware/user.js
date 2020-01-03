@@ -25,18 +25,18 @@ module.exports = () => {
     const query = socket.handshake.query;
     // 用户信息
     const { room } = query;
-    // 用户加入
-    socket.join(room);
     // 存储用户信息倒数据库
     const client = await new Client({ clientId: id, ...query, connectTime: Date.now(), lastLiveTime: Date.now() }).save();
+    // 用户加入
+    socket.join(room);
     // 通知 /sys 下的连接，房间人员变动
     nspSys.emit('user room online', { meta: { timestamp: Date.now() }, room, action: 'join', client });
     await next();
-    // 用户离开，删除数据库中的信息
-    await Client.deleteMany({ clientId: id });
     // 修改最后一次活跃时间
     client.lastLiveTime = Date.now();
     // 通知 /sys 下的连接，房间人员变动
     nspSys.emit('user room online', { meta: { timestamp: Date.now() }, room, action: 'leave', client });
+    // 用户离开，删除数据库中的信息
+    await Client.deleteMany({ clientId: id });
   };
 };

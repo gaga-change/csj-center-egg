@@ -93,6 +93,7 @@ module.exports = appInfo => {
       useFindAndModify: false,
     },
     plugins: [],
+    agent: true,
   };
 
   return {

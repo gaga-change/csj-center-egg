@@ -22,7 +22,6 @@ module.exports = () => {
     // 用户的在线列表
     nspUser.adapter.clients([], async (err, clientIds) => {
       const clients = await Client.find({ clientId: { $in: clientIds } }).sort('-lastLiveTime');
-      await Client.deleteMany({ clientId: { $nin: clientIds } });
       // 发送当前用户的在线列表，指定当前人员
       nsp.to(id).emit('user all online', {
         meta: { timestamp: Date.now() },
