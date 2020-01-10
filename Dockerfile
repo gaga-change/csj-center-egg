@@ -3,9 +3,11 @@ ENV NODE_ENV production
 WORKDIR /usr/src/app
 COPY ./page/package.json .
 RUN ls
-RUN npm install
+RUN npm --registry https://registry.npm.taobao.org install --production --silent
 COPY ./page .
 RUN ls
+RUN cd ./node_modules & ls
+RUN ../
 RUN npm run build
 RUN ls
 FROM node:10-alpine
