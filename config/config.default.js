@@ -85,6 +85,7 @@ module.exports = appInfo => {
 
   config.static = {
     prefix: '/',
+    dir: 'page/dist',
   };
 
   config.mongoose = {

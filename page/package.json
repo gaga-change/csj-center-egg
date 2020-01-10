@@ -1,0 +1,26 @@
+{
+  "name": "src",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "parcel watch ./html/*.html --out-dir ./dist",
+    "build": "parcel build ./html/*.html --out-dir ./dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "element-ui": "^2.13.0",
+    "jquery": "^3.4.1",
+    "moment": "^2.24.0",
+    "preact": "^10.2.1",
+    "socket.io-client": "^2.3.0",
+    "vue": "^2.6.11",
+    "vue-hot-reload-api": "^2.3.4"
+  },
+  "devDependencies": {
+    "@vue/component-compiler-utils": "^3.1.1",
+    "parcel-bundler": "^1.12.4",
+    "vue-template-compiler": "^2.6.11"
+  }
+}
