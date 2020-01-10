@@ -6,9 +6,7 @@ RUN ls
 RUN npm --registry https://registry.npm.taobao.org install --production --silent
 COPY ./page .
 RUN ls
-RUN cd ./node_modules
-RUN ls
-RUN cd ../
+RUN ls ./node_modules
 RUN npm run build
 RUN ls
 FROM node:10-alpine
