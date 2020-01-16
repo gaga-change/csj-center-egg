@@ -3,6 +3,8 @@ body {
 }
 
 .tag-list-card .el-card__body {
+  height: 75px;
+  overflow: auto;
   padding: 15px 15px 20px 15px;
 }
 
