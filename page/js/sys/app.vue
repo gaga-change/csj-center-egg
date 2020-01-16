@@ -15,40 +15,48 @@
     </span>
 
     <h4>系统在线人员统计</h4>
-    <el-card class="mt20" v-for="(clients, key) in roomClients" :key="key">
-      <div slot="header" class="clearfix">
-        <span>{{ key }}</span>
-      </div>
-      <template v-for="(client, index) in clients">
-        <el-tooltip :key="client.clientId" placement="top" effect="light">
-          <div slot="content">
-            用户： {{ client.userId }}
-            <br />
-            连接时间： {{ client.connectTimeShow }}
-            <br />
-            活跃时间： {{ client.lastLiveTimeShow }}
+    <el-row :gutter="20">
+      <el-col  :xs="24" :sm="12" :md="12" :lg="8" >
+        <el-card
+          class="mt20 tag-list-card"
+          v-for="(clients, key) in roomClients"
+          :key="key"
+        >
+          <div slot="header" class="clearfix">
+            <span>{{ key }}</span>
           </div>
-          <el-tag
-            :class="{ ml10: index !== 0 }"
-            :type="
-              client.noLiveTime > 300000
-                ? 'info'
-                : client.noLiveTime > 180000
-                ? 'warning'
-                : 'success'
-            "
-            >{{ client.username }} - {{ client.version }}</el-tag
-          >
-        </el-tooltip>
-      </template>
-    </el-card>
+          <template v-for="(client, index) in clients">
+            <el-tooltip :key="client.clientId" placement="top" effect="light">
+              <div slot="content">
+                用户： {{ client.userId }}
+                <br />
+                连接时间： {{ client.connectTimeShow }}
+                <br />
+                活跃时间： {{ client.lastLiveTimeShow }}
+              </div>
+              <el-tag
+                class="ml5 mr5 mt5"
+                :type="
+                  client.noLiveTime > 300000
+                    ? 'info'
+                    : client.noLiveTime > 180000
+                    ? 'warning'
+                    : 'success'
+                "
+                >{{ client.username }} - {{ client.version }}</el-tag
+              >
+            </el-tooltip>
+          </template>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script>
 import Vue from "vue";
 import moment from "moment";
-import 'moment/locale/zh-cn';
+import "moment/locale/zh-cn";
 const API = "";
 export default Vue.extend({
   data() {
@@ -137,7 +145,6 @@ export default Vue.extend({
   },
   mounted() {
     this.reload = true;
-    this.$$("#app").removeClass("app_hide");
     setInterval(() => {
       for (let room in this.roomClients) {
         this.roomClients[room].forEach(v => {

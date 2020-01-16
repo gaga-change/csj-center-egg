@@ -1,9 +1,11 @@
 body {
   padding: 15px;
 }
-.app_hide {
-  visibility: hidden;
+
+.tag-list-card .el-card__body {
+  padding: 15px 15px 20px 15px;
 }
+
 .mt20 {
   margin-top: 20px;
 }
@@ -12,4 +14,13 @@ body {
 }
 .f12 {
   font-size: 12px;
+}
+.ml5 {
+  margin-left: 5px;
+}
+.mr5 {
+  margin-right: 5px;
+}
+.mt5 {
+  margin-top: 5px;
 }
