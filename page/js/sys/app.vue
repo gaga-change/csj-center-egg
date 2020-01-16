@@ -16,11 +16,9 @@
 
     <h4>系统在线人员统计</h4>
     <el-row :gutter="20">
-      <el-col  :xs="24" :sm="12" :md="12" :lg="8" >
+      <el-col  :xs="24" :sm="12" :md="12" :lg="8"  v-for="(clients, key) in roomClients" :key="key">
         <el-card
           class="mt20 tag-list-card"
-          v-for="(clients, key) in roomClients"
-          :key="key"
         >
           <div slot="header" class="clearfix">
             <span>{{ key }}</span>
